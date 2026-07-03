@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEBUKU – Deteksi Buah Ku</title>
+  <meta name="description" content="Deteksi kesegaran buah secara otomatis menggunakan Vision Transformer (ViT) AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+  <!-- ── Background Grid & Ambient Glows ── -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">🍓</span>
+      <span class="logo-text">Deteksi Buah <span class="logo-accent">Ku</span></span>
+    </div>
+    <div class="badge">ViT Model · Active GPU · 92.45% Acc</div>
+  </header>
+
+  <!-- ── Main Dashboard ── -->
+  <main class="main">
+
+    <!-- Hero / Intro Header -->
+    <section class="hero">
+      <div class="hero-badge">⚡ Next-Gen Fruit Inspection</div>
+      <h1 class="hero-title">Deteksi Kesegaran<br /><span class="gradient-text">Buah Secara Real-Time</span></h1>
+      <p class="hero-sub">Analisis kondisi buah apel, pisang, dan stroberi secara instan berbasis Vision Transformer
+        (ViT).</p>
+
+      <!-- Supported fruits pills -->
+      <div class="pills">
+        <span class="pill">🍎 Apel</span>
+        <span class="pill">🍌 Pisang</span>
+        <span class="pill">🍓 Stroberi</span>
+      </div>
+    </section>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-grid">
+
+      <!-- Column Left: Input & Preview -->
+      <div class="dashboard-left">
+        <section class="card upload-card" id="upload-section">
+          <div class="card-header">
+            <h3 class="card-title">Input Gambar</h3>
+            <p class="card-desc">Unggah gambar buah untuk mulai mendeteksi</p>
+          </div>
+
+          <!-- Drop zone -->
+          <div class="drop-zone" id="drop-zone">
+            <div class="drop-icon" id="drop-icon">📸</div>
+            <p class="drop-text" id="drop-text">Letakkan gambar di sini</p>
+            <p class="drop-sub">atau klik untuk menelusuri file</p>
+            <input type="file" id="file-input" accept="image/*" hidden />
+            <button class="btn-upload" id="btn-browse" type="button">
+              Pilih File
+            </button>
+          </div>
+
+          <!-- Preview & Scan Laser Animation -->
+          <div class="preview-wrap" id="preview-wrap" style="display:none">
+            <div class="preview-container">
+              <img id="preview-img" class="preview-img" src="" alt="Preview buah" />
+              <!-- Laser scanner bar -->
+              <div class="scanner-laser" id="scanner-laser"></div>
+            </div>
+            <button class="btn-reset" id="btn-reset" type="button">✕ Ganti Gambar</button>
+          </div>
+
+          <!-- Predict button -->
+          <button class="btn-predict" id="btn-predict" disabled>
+            <span id="btn-label">🔍 Mulai Analisis</span>
+            <span id="btn-spinner" class="spinner" style="display:none"></span>
+          </button>
+        </section>
+      </div>
+
+      <!-- Column Right: Results & Insights -->
+      <div class="dashboard-right">
+
+        <!-- Welcome/Instruction Card (Visible initially) -->
+        <section class="card instruction-card" id="instruction-card">
+          <div class="card-header">
+            <h3 class="card-title">Panduan Pemindaian</h3>
+            <p class="card-desc">Tips mendapatkan hasil prediksi AI yang akurat</p>
+          </div>
+
+          <ul class="guide-list">
+            <li class="guide-item">
+              <span class="guide-num">01</span>
+              <div>
+                <h4>Fokus & Dekat</h4>
+                <p>Posisikan buah di tengah frame dan ambil gambar dari jarak dekat agar detail tekstur terlihat jelas.
+                </p>
+              </div>
+            </li>
+            <li class="guide-item">
+              <span class="guide-num">02</span>
+              <div>
+                <h4>Pencahayaan Baik</h4>
+                <p>Gunakan cahaya terang atau sinar alami. Hindari bayangan gelap yang berlebihan pada objek buah.</p>
+              </div>
+            </li>
+            <li class="guide-item">
+              <span class="guide-num">03</span>
+              <div>
+                <h4>Satu Buah per Foto</h4>
+                <p>Pastikan hanya ada satu jenis buah dominan di dalam foto agar klasifikasi model ViT bekerja maksimal.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Result Card (Initially hidden) -->
+        <section class="card result-card" id="result-card" style="display:none">
+          <div class="card-header">
+            <h3 class="card-title">Laporan Analisis AI</h3>
+            <p class="card-desc">Hasil identifikasi model Vision Transformer</p>
+          </div>
+
+          <div class="result-header">
+            <span class="result-emoji" id="result-emoji">🍎</span>
+            <div>
+              <h2 class="result-label" id="result-label">–</h2>
+              <span class="result-badge" id="result-badge">–</span>
+            </div>
+          </div>
+
+          <!-- Confidence Level -->
+          <div class="confidence-wrap">
+            <div class="confidence-row">
+              <span class="conf-title">Tingkat Keyakinan (Confidence)</span>
+              <span class="conf-value" id="conf-value">0%</span>
+            </div>
+            <div class="conf-bar-bg">
+              <div class="conf-bar-fill" id="conf-bar"></div>
+            </div>
+          </div>
+
+          <!-- Recommendations / Storage Tips -->
+          <div class="tips-box" id="tips-box">
+            <div class="tips-header">
+              <span class="tips-icon" id="tips-icon">💡</span>
+              <h4 class="tips-title" id="tips-title">Rekomendasi Penanganan</h4>
+            </div>
+            <p class="tips-text" id="tips-text">Unggah gambar terlebih dahulu untuk melihat rekomendasi penyimpanan.</p>
+          </div>
+
+          <!-- All class probs -->
+          <div class="probs-section">
+            <p class="probs-title">Distribusi Probabilitas Kelas</p>
+            <div class="probs-list" id="probs-list"></div>
+          </div>
+        </section>
+
+        <!-- Scan History Card -->
+        <section class="card history-card" id="history-card">
+          <div class="card-header history-header-row">
+            <div>
+              <h3 class="card-title">Riwayat Pemindaian</h3>
+              <p class="card-desc">Hasil analisis terakhir yang disimpan</p>
+            </div>
+            <button class="btn-clear-history" id="btn-clear-history" type="button" style="display: none;">
+              Hapus Semua
+            </button>
+          </div>
+
+          <div class="history-empty" id="history-empty">
+            <div class="empty-icon">⏳</div>
+            <p>Belum ada riwayat pemindaian sebelumnya.</p>
+          </div>
+
+          <div class="history-list" id="history-list" style="display: none;">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <p>DEBUKU AI · Dibuat dengan ❤️ · ViT (Vision Transformer) · PyTorch + Flask</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+
+</html>
